@@ -1,5 +1,3 @@
-// 📦 Backend server using Node.js + Express + Axios to fetch NSE India stock data
-
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
@@ -13,22 +11,21 @@ app.get('/api/stock/:symbol', async (req, res) => {
   const { from, to } = req.query;
 
   try {
-    const response = await axios.get(`https://www.nseindia.com/api/historical/cm/equity`, {
-      params: {
-        symbol,
-        series: '["EQ"]',
-        from,
-        to
-      },
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0',
-        'Referer': 'https://www.nseindia.com/'
+    const response = await axios.get(
+      `https://www.nseindia.com/api/historical/cm/equity?symbol=${symbol}&series=[%22EQ%22]&from=${from}&to=${to}`,
+      {
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+          'Referer': 'https://www.nseindia.com/',
+        }
       }
-    });
+    );
+
     res.json(response.data);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch data', details: err.message });
+  } catch (error) {
+    console.error('Error fetching data:', error.message);
+    res.status(500).json({ error: 'Failed to fetch NSE data', details: error.message });
   }
 });
 
