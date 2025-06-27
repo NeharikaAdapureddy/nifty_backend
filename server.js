@@ -1,34 +1,27 @@
-const express = require('express');
-const axios = require('axios');
-const cors = require('cors');
-const app = express();
-const port = process.env.PORT || 3000;
+// server.js
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
 
+const app = express();
 app.use(cors());
 
-app.get('/api/stock/:symbol', async (req, res) => {
-  const { symbol } = req.params;
-  const { from, to } = req.query;
+const API_KEY = "d0f9c1b68700451bbf2c916f0724af21";
 
+app.get("/stock", async (req, res) => {
+  const { symbol, start, end } = req.query;
   try {
-    const response = await axios.get(
-      `https://www.nseindia.com/api/historical/cm/equity?symbol=${symbol}&series=[%22EQ%22]&from=${from}&to=${to}`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-          'Referer': 'https://www.nseindia.com/',
-        }
-      }
-    );
-
-    res.json(response.data);
-  } catch (error) {
-    console.error('Error fetching data:', error.message);
-    res.status(500).json({ error: 'Failed to fetch NSE data', details: error.message });
+    const url = `https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&start_date=${start}&end_date=${end}&apikey=${API_KEY}`;
+    const response = await axios.get(url);
+    res.json({ symbol, data: response.data });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch stock data" });
   }
 });
 
-app.listen(port, () => {
-  console.log(`✅ Server running at http://localhost:${port}`);
+app.get("/", (req, res) => {
+  res.send("Hello from Nifty Backend!");
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
